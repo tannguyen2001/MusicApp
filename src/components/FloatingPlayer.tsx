@@ -7,13 +7,28 @@ import { GotoNextButton, GotoPreviousButton, PlayPauseButton } from './PlayerCon
 import { useSharedValue } from 'react-native-reanimated'
 import { Slider } from 'react-native-awesome-slider'
 import MovingText from './MovingText'
+import { useNavigation } from '@react-navigation/native'
+import { RootStackParamList } from '../../App'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 
 const imagrUrl = "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRQhktRe3VcuAHtvJ0MPkU6z2MHKvlYWYzSUTNidnBPvwQuZMb4"
 
+
+
+type screenProp = NativeStackNavigationProp<RootStackParamList>
+
+
 const FloatingPlayer = () => {
+
+    const navigation = useNavigation<screenProp>()
+
     const progress = useSharedValue(0.2)
     const min = useSharedValue(0)
     const max = useSharedValue(1)
+
+    const handleOpenPlayerScreen = ()=>{
+        navigation.navigate("PLAYER_SCREEN")
+    }
 
     return (
         <View>
@@ -30,7 +45,10 @@ const FloatingPlayer = () => {
                 renderBubble={() => <View />}
 
             />
-            <TouchableOpacity style={styles.container} activeOpacity={0.6} >
+            <TouchableOpacity style={styles.container} 
+                activeOpacity={0.6} 
+                onPress={handleOpenPlayerScreen}
+                >
                 <Image source={{ uri: imagrUrl }} style={styles.coverImage} />
                 <View style={styles.titleContainer}>
                     <MovingText
