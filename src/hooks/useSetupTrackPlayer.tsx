@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import TrackPlayer, { Capability, RatingType, RepeatMode } from "react-native-track-player"
 
 const setupPlayer = async () => {
@@ -15,7 +15,13 @@ const setupPlayer = async () => {
             Capability.SkipToPrevious,
             Capability.Stop,
         ],
-        compactCapabilities: [Capability.Play, Capability.Pause],
+        compactCapabilities: [
+            Capability.Play,
+            Capability.Pause,
+            Capability.SkipToNext,
+            Capability.SkipToPrevious,
+            Capability.Stop,
+        ],
     })
 
     await TrackPlayer.setVolume(0.5)
@@ -23,14 +29,20 @@ const setupPlayer = async () => {
 }
 
 
-export const useSetupPlayer = () => {
-
-
+export const useSetupPlayer = ({onLoad}:any) => {
+    
+    const isInitialized = useRef(false)
 
     //add logic for setup
     useEffect(() => {
         setupPlayer().then(() => {
-            console.log("player success setup")
+            isInitialized.current = true
+            onLoad()
+
+        })
+        .catch((error)=>{
+            isInitialized.current = false
+            console.log("error:",error)
         })
     }, [])
 

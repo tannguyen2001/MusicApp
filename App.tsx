@@ -1,24 +1,19 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import DrawerNavigation from './src/navigation/DrawerNavigation'
-import TrackPlayer from 'react-native-track-player'
+import { useSetupPlayer } from './src/hooks/useSetupTrackPlayer'
 
 
 
 const App = () => {
 
-  const setupPlayer = async () => {
-    await TrackPlayer.setupPlayer()
-    console.log("success setup player")
+  const onLoad = () =>{
+    console.log('Success setup player')
   }
 
-
-  useEffect(() => {
-    setupPlayer()
-  }, [])
-
-
+  //setup track player app
+  useSetupPlayer({onLoad})
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

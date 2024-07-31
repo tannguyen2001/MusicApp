@@ -5,25 +5,37 @@ import { fontFamilies } from '../constants/fonts'
 import { fontSizes, spacing } from '../constants/dimension'
 import { Slider } from 'react-native-awesome-slider'
 import { useSharedValue } from 'react-native-reanimated'
+import TrackPlayer, { useProgress } from 'react-native-track-player'
+import { formatSecondsToMinutes } from '../utils'
 
-const PlayerProgressBar = () => {
-    const progress = useSharedValue(0.25);
+const PlayerProgressBar = ({ timeRow, styleContainer, styleSlider, thumbWidth = 18 }: any) => {
+
+    const { duration, position } = useProgress()
+
+    const progress = useSharedValue(0);
     const min = useSharedValue(0);
     const max = useSharedValue(1);
 
+    const isSliding = useSharedValue(false)
+
+    if (!isSliding.value) {
+        progress.value = duration > 0 ? position / duration : 0
+
+    }
+
     return (
         <View>
-            <View style={styles.timeRow}>
-                <Text style={styles.timeText}>00:50</Text>
-                <Text style={styles.timeText}>{"-"}04:00</Text>
-            </View>
+            {timeRow &&
+                <View style={styles.timeRow}>
+                    <Text style={styles.timeText}>{formatSecondsToMinutes(position)}</Text>
+                    <Text style={styles.timeText}>{"-"}{formatSecondsToMinutes(duration - position)}</Text>
+                </View>}
             <Slider
-                style={styles.sliderContainer}
-                containerStyle={{
+                style={[styles.sliderContainer, styleSlider]}
+                containerStyle={[{
                     height: 8,
                     borderRadius: spacing.sm,
-
-                }}
+                }, { ...styleContainer }]}
                 theme={{
                     maximumTrackTintColor: colors.maximumTintColor,
                     minimumTrackTintColor: colors.minimumTintColor
@@ -31,8 +43,20 @@ const PlayerProgressBar = () => {
                 progress={progress}
                 minimumValue={min}
                 maximumValue={max}
-                thumbWidth={18}
+                thumbWidth={thumbWidth}
                 renderBubble={() => null}
+                onSlidingStart={() => isSliding.value}
+                onValueChange={async (value) => {
+                    await TrackPlayer.seekTo(value * duration)
+                }}
+                onSlidingComplete={async (value) => {
+                    if (!isSliding.value) {
+                        return
+                    }
+                    isSliding.value = false
+                    await TrackPlayer.seekTo(value * duration)
+                }}
+
             />
         </View>
     )

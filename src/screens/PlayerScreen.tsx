@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Image } from 'react-native'
-import React from 'react'
+import { View, Text, StyleSheet, Image, ActivityIndicator } from 'react-native'
+import React, { useState } from 'react'
 import { colors } from '../constants/colors'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import AntDesign from 'react-native-vector-icons/AntDesign'
@@ -10,30 +10,55 @@ import PlayerRepeatToggle from '../components/PlayerRepeatToggle'
 import PlayerSuffleToggle from '../components/PlayerShuffleToggle'
 import PlayerProgressBar from '../components/PlayerProgressBar'
 import { GotoNextButton, GotoPreviousButton, PlayPauseButton } from '../components/PlayerControls'
-
-
-const imageUrl = "https://ncsmusic.s3.eu-west-1.amazonaws.com/tracks/000/001/644/1000x0/pretty-afternoon-1709859658-TKAtqZGQtZ.jpg"
+import TrackPlayer, { useActiveTrack } from 'react-native-track-player'
+import { useNavigation } from '@react-navigation/native'
 
 const PlayerScreen = () => {
 
+  const activeTrack = useActiveTrack()
+  const navigation = useNavigation()
+  const [isMute,setIsmute] = useState(false)
+
   const isLiked = false
-  const isMute = false
+
+  const handleToggleValue = ()=>{
+      setIsmute(prevIsmute => {
+        TrackPlayer.setVolume(!prevIsmute ? 0 : 1)
+        return !prevIsmute
+      })
+      
+  }
+
+  if(!activeTrack)
+  {
+    return (
+      <View 
+        style={{
+          flex:1,
+          justifyContent:'center',
+          alignItems:'center',
+          backgroundColor:colors.background
+          }}>
+        <ActivityIndicator size={"large"} color={colors.iconPrimary} />
+      </View>
+    )
+  }
 
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={()=>navigation.goBack()}>
           <AntDesign name='arrowleft' color={colors.iconPrimary} size={iconSizes.md} />
         </TouchableOpacity>
         <Text style={styles.headerText}>Playing Now</Text>
       </View>
       <View style={styles.coverImageContainer}>
-        <Image source={{ uri: imageUrl }} style={styles.coverImage} />
+        <Image source={{ uri: activeTrack?.artwork }} style={styles.coverImage} />
       </View>
       <View style={styles.titleRowHeartContainer}>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Believer</Text>
-          <Text style={styles.artist}>IMAGIEN DRAGON</Text>
+          <Text style={styles.title}>{activeTrack?.title}</Text>
+          <Text style={styles.artist}>{activeTrack?.artist}</Text>
         </View>
         <TouchableOpacity>
           <AntDesign name={isLiked ? 'heart' : 'hearto'} color={colors.iconPrimary} size={iconSizes.md} />
@@ -41,7 +66,7 @@ const PlayerScreen = () => {
       </View>
 
       <View style={styles.playerControlContainer}>
-        <TouchableOpacity style={styles.volumeWrapper}>
+        <TouchableOpacity style={styles.volumeWrapper} onPress={handleToggleValue}>
           <Feather name={isMute ? 'volume-x' : 'volume-1'} size={iconSizes.lg} color={colors.iconSecondary} />
         </TouchableOpacity>
         <View style={styles.repeatShuffleWrapper} >
@@ -50,7 +75,7 @@ const PlayerScreen = () => {
         </View>
       </View>
 
-      <PlayerProgressBar />
+      <PlayerProgressBar timeRow />
 
       <View style={styles.playPauseContainer}>
         <GotoPreviousButton size={iconSizes.xl} />
