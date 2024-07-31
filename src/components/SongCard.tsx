@@ -3,21 +3,21 @@ import React from 'react'
 import { colors } from '../constants/colors'
 import { fontFamilies } from '../constants/fonts'
 import { fontSizes, spacing } from '../constants/dimension'
+import TrackPlayer from 'react-native-track-player'
 
 
-const imageUrl = "https://ncsmusic.s3.eu-west-1.amazonaws.com/tracks/000/001/644/1000x0/pretty-afternoon-1709859658-TKAtqZGQtZ.jpg"
 
-interface SongCardProps {
-    containerStyle?: object
-    imageStyle?: object
-}
 
-const SongCard: React.FC<SongCardProps> = ({ containerStyle, imageStyle }) => {
+const SongCard = ({ item, containerStyle, imageStyle, handlePlay }: any) => {
+
+
     return (
-        <TouchableOpacity style={[styles.container, containerStyle]}>
-            <Image source={{ uri: imageUrl }} style={[styles.coverImage, imageStyle]} />
-            <Text style={styles.title} numberOfLines={1}>Monster Go Home</Text>
-            <Text style={styles.author}>Alan Walker</Text>
+        <TouchableOpacity style={[styles.container, containerStyle]}
+            onPress={() => handlePlay(item)}
+        >
+            <Image source={{ uri: item.artwork }} style={[styles.coverImage, imageStyle]} />
+            <Text style={styles.title} numberOfLines={1}>{item?.title}</Text>
+            <Text style={styles.artist}>{item?.artist}</Text>
         </TouchableOpacity>
     )
 }
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
         paddingVertical: spacing.sm,
 
     },
-    author: {
+    artist: {
         color: colors.textSecondary,
         fontSize: fontSizes.md,
         fontFamily: fontFamilies.regular,

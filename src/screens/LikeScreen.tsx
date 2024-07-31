@@ -8,12 +8,17 @@ import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons'
 import { fontFamilies } from '../constants/fonts'
 import SongCard from '../components/SongCard'
 import FloatingPlayer from '../components/FloatingPlayer'
+import { useNavigation } from '@react-navigation/native'
 
 const LikeScreen = () => {
+
+    const navigation = useNavigation()
+
+
     return (
         <View style={styles.container}>
             <View style={styles.headerContailer}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
                     <AntDesign name='arrowleft' color={colors.iconPrimary} size={iconSizes.md} />
                 </TouchableOpacity>
                 <TouchableOpacity>
