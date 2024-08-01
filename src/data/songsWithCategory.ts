@@ -14,3 +14,8 @@ export const songsWithCategory = [
         songs: recommendedSongs
     }
 ]
+
+export const likeSongs = {
+    title: 'Like Songs',
+    songs: recommendedSongs
+}

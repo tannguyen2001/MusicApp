@@ -1,15 +1,12 @@
-import { Text, Image, StyleSheet, TouchableOpacity } from 'react-native'
+import { Text, Image, StyleSheet, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import { colors } from '../constants/colors'
 import { fontFamilies } from '../constants/fonts'
 import { fontSizes, spacing } from '../constants/dimension'
-import TrackPlayer from 'react-native-track-player'
-
 
 
 
 const SongCard = ({ item, containerStyle, imageStyle, handlePlay }: any) => {
-
 
     return (
         <TouchableOpacity style={[styles.container, containerStyle]}

@@ -9,12 +9,12 @@ import { fontFamilies } from '../constants/fonts'
 import SongCard from '../components/SongCard'
 import FloatingPlayer from '../components/FloatingPlayer'
 import { useNavigation } from '@react-navigation/native'
+import { likeSongs } from '../data/songsWithCategory'
+
 
 const LikeScreen = () => {
 
     const navigation = useNavigation()
-
-
     return (
         <View style={styles.container}>
             <View style={styles.headerContailer}>
@@ -28,11 +28,12 @@ const LikeScreen = () => {
 
             <FlatList
                 ListHeaderComponent={
-                    <Text style={styles.headingText}>Liked Songs</Text>
+                    <Text style={styles.headingText}>{likeSongs.title}</Text>
                 }
 
-                data={[1, 2, 3, 4, 5]}
-                renderItem={() => <SongCard
+                data={likeSongs.songs}
+                renderItem={(data) => <SongCard
+                    item={data.item}
                     containerStyle={{ width: '47%' }}
                     imageStyle={{
                         height: 160,
