@@ -4,10 +4,8 @@ Songs API routes
 
 import uuid
 from typing import Any
-from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi.responses import StreamingResponse, RedirectResponse
 from sqlmodel import select, func
 
 from app.api.deps import CurrentUser, SessionDep
@@ -155,20 +153,30 @@ def read_song_lyrics(session: SessionDep, song_id: uuid.UUID) -> Any:
 
 
 @router.post("/{song_id}/play")
-async def play_song(
-    *, session: SessionDep, current_user: CurrentUser, song_id: uuid.UUID
+def play_song(
+    session: SessionDep, current_user: CurrentUser, song_id: uuid.UUID
 ) -> Message:
     """
-    Record a song play and increment play count
+    Record song play (increment play count).
+    This would also create play history record in a real implementation.
     """
     song = crud.get_song(session=session, song_id=song_id)
     if not song:
         raise HTTPException(status_code=404, detail="Song not found")
     
     # Increment play count
-    crud.increment_play_count(session=session, song_id=song_id)
+    song.play_count += 1
+    session.add(song)
+    session.commit()
     
-    # TODO: Record in play history when implemented
+    # TODO: Add to play history
+    # play_history = PlayHistory(
+    #     user_id=current_user.id,
+    #     song_id=song_id,
+    #     duration_played_ms=song.duration_ms  # Assume full play
+    # )
+    # session.add(play_history)
+    # session.commit()
     
     return Message(message="Play recorded successfully")
 
@@ -205,50 +213,3 @@ def search_songs(
     songs = list(session.exec(statement))
     count = len(songs)
     return SongsPublic(data=songs, count=count)
-
-
-@router.get("/{song_id}/stream")
-async def stream_song(song_id: uuid.UUID, session: SessionDep) -> Any:
-    """
-    Stream a song file
-    """
-    song = crud.get_song(session=session, song_id=song_id)
-    if not song:
-        raise HTTPException(status_code=404, detail="Song not found")
-    
-    if not song.file_url:
-        raise HTTPException(status_code=404, detail="Song file not available")
-    
-    # If it's a local API file URL, redirect to files endpoint
-    if song.file_url.startswith("/api/v1/files/songs/"):
-        filename = song.file_url.split("/")[-1]
-        return RedirectResponse(f"/api/v1/files/songs/{filename}")
-    
-    # If it's an external URL, redirect directly
-    return RedirectResponse(song.file_url)
-
-
-@router.patch("/{song_id}/lyrics")
-def update_song_lyrics(
-    *,
-    session: SessionDep,
-    current_user: CurrentUser,
-    song_id: uuid.UUID,
-    lyrics: str
-) -> Message:
-    """
-    Update song lyrics (Artist/Admin only)
-    """
-    song = crud.get_song(session=session, song_id=song_id)
-    if not song:
-        raise HTTPException(status_code=404, detail="Song not found")
-    
-    # Check permissions
-    if not current_user.is_superuser and song.artist_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-    
-    song.lyrics = lyrics
-    session.add(song)
-    session.commit()
-    
-    return Message(message="Lyrics updated successfully")
