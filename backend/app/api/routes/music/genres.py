@@ -8,7 +8,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Depends
 from sqlmodel import select
 
-from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
+from app.api.deps import CurrentUser, SessionDep
 from app import crud
 from app.models import (
     Genre, GenreCreate, GenrePublic, GenresPublic,
@@ -41,7 +41,7 @@ def read_genre(session: SessionDep, genre_id: uuid.UUID) -> Any:
     return genre
 
 
-@router.post("/", dependencies=[Depends(get_current_active_superuser)], response_model=GenrePublic)
+@router.post("/", response_model=GenrePublic)
 def create_genre(
     *, session: SessionDep, current_user: CurrentUser, genre_in: GenreCreate
 ) -> Any:
@@ -49,6 +49,12 @@ def create_genre(
     Create new genre.
     Only superusers can create genres.
     """
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403, 
+            detail="Only superusers can create genres"
+        )
+    
     # Check if genre already exists
     existing = crud.get_genre_by_name(session=session, name=genre_in.name)
     if existing:
